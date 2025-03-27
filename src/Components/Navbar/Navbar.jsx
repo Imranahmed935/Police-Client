@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import { AuthContext } from "../../AuthProvider/AuthProvider";
 
 const Navbar = () => {
-  const { user, logOut } = useContext(AuthContext); // Assuming logOut is provided
+  const { user, logOut } = useContext(AuthContext);
 
   const handleLogout = () => {
     logOut()
@@ -15,7 +15,7 @@ const Navbar = () => {
       });
   };
 
-  const navLinks = (
+  const commonLinks = (
     <>
       <li>
         <NavLink
@@ -32,16 +32,45 @@ const Navbar = () => {
     </>
   );
 
+  const authLinks = user ? (
+    <>
+      <li><NavLink to="/profile">প্রোফাইল</NavLink></li>
+      <li><NavLink to="/dashboard">ড্যাশবোর্ড</NavLink></li>
+      <li><NavLink to="/settings">সেটিংস</NavLink></li>
+      <li><button className="bg-red-500 text-white p-2 rounded" onClick={handleLogout}>লগআউট</button></li>
+    </>
+  ) : (
+    <>
+      <li>
+        <NavLink
+          to="/login"
+          className="bg-[#1E317D] text-white p-2 rounded"
+        >
+          লগইন
+        </NavLink>
+      </li>
+      <li>
+        <NavLink
+          to="/signUp"
+          className="border border-[#1E317D] text-[#1E317D] p-2 rounded"
+        >
+          সাইন-আপ
+        </NavLink>
+      </li>
+    </>
+  );
+
   return (
-    <div className="navbar px-4 max-w-7xl mx-auto">
-      {/* Left: Logo */}
+    <div className="bg-[#FFFFFF]">
+      <div className="navbar px-4 max-w-7xl mx-auto">
+      {/* Logo */}
       <div className="flex-1">
         <NavLink to="/" className="text-xl font-bold text-[#1E317D]">
           MyApp
         </NavLink>
       </div>
 
-      {/* Right: Navigation */}
+      {/* Navigation */}
       <div className="flex-none">
         {/* Mobile menu */}
         <div className="dropdown dropdown-end lg:hidden">
@@ -56,25 +85,18 @@ const Navbar = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h8m-8 6h16" />
             </svg>
           </label>
-          <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-            {navLinks}
-            {user ? (
-              <>
-                <li><NavLink to="/profile">প্রোফাইল</NavLink></li>
-                <li><button onClick={handleLogout}>লগআউট</button></li>
-              </>
-            ) : (
-              <>
-                <li><NavLink to="/login">লগইন</NavLink></li>
-                <li><NavLink to="/signUp">সাইন-আপ</NavLink></li>
-              </>
-            )}
+          <ul
+            tabIndex={0}
+            className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+          >
+            {commonLinks}
+            {authLinks}
           </ul>
         </div>
 
         {/* Desktop menu */}
         <ul className="menu menu-horizontal hidden lg:flex items-center gap-4">
-          {navLinks}
+          {commonLinks}
           {user ? (
             <div className="dropdown dropdown-end">
               <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
@@ -85,34 +107,19 @@ const Navbar = () => {
                   />
                 </div>
               </div>
-              <ul tabIndex={0} className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
-                <li><NavLink to="/profile">প্রোফাইল</NavLink></li>
-                <li><NavLink to="/settings">সেটিংস</NavLink></li>
-                <li><button onClick={handleLogout}>লগআউট</button></li>
+              <ul
+                tabIndex={0}
+                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+              >
+                {authLinks}
               </ul>
             </div>
           ) : (
-            <>
-              <li>
-                <NavLink
-                  to="/login"
-                  className="bg-[#1E317D] text-white p-2 rounded"
-                >
-                  লগইন
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  to="/signUp"
-                  className="border border-[#1E317D] text-[#1E317D] p-2 rounded"
-                >
-                  সাইন-আপ
-                </NavLink>
-              </li>
-            </>
+            authLinks
           )}
         </ul>
       </div>
+    </div>
     </div>
   );
 };

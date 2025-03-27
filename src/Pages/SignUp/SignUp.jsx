@@ -1,29 +1,61 @@
 import React, { useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react"; // Optional: You can use Heroicons or FontAwesome too
 import { AuthContext } from "../../AuthProvider/AuthProvider";
+import { updateProfile } from "firebase/auth";
+import auth from "../../firebase/firebase.config";
+import axios from "axios";
+import toast from "react-hot-toast";
+
 
 const SignUp = () => {
-  const {handleSignUp} = useContext(AuthContext)
+  const { handleSignUp } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState("");
   const [bpNumber, setBpNumber] = useState("");
+  const [Designation, setDesignation] = useState('')
   const [birthDate, setBirthDate] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const loginCredencial = {fullName, bpNumber, birthDate, email, password}
 
-  const handleForm = (e) => {
+
+  const handleForm = async (e) => {
     e.preventDefault();
-    handleSignUp(email, password)
-    .then((result)=>{
-      console.log(result.user)
-    }).catch((err)=>{
-      console.log(err.message)
-    })
+  
+    try {
+      const result = await handleSignUp(email, password);
+      console.log(result.user);
+  
+      await updateProfile(auth.currentUser, {
+        displayName: fullName,
+      });
+      console.log('Profile updated');
+  
+      // Prepare user info to send to backend
+      const signUpInfo = {
+        name: fullName,
+        email,
+        bpNumber,
+        birthDate,
+        Designation,
+        password
+      };
+  
+      // POST to your server
+      const res = await axios.post('http://localhost:5000/users', signUpInfo);
+      if(res.data.insertedId){
+        toast.success('সফলভাবে সম্পন্ন হয়েছে');
 
-    
+      }
+  
+      // Navigate after everything is successful
+      navigate('/');
+    } catch (err) {
+      console.error(err.message);
+    }
   };
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
@@ -57,6 +89,35 @@ const SignUp = () => {
               placeholder="বিপি নম্বর"
               className="w-full input rounded-lg hover:border-[#1E317D] transition-colors"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              পদবি (Designation)
+            </label>
+            <select
+              value={Designation}
+              onChange={(e)=>setDesignation(e.target.value)}
+              className="w-full input input-bordered rounded-lg hover:border-[#1E317D] transition-colors"
+              required
+            >
+              <option value="">পদবি নির্বাচন করুন</option>
+              <option value="ইন্সপেক্টর জেনারেল অফ পুলিশ (IGP)">ইন্সপেক্টর জেনারেল অফ পুলিশ (IGP)</option>
+              <option value="অতিরিক্ত ইন্সপেক্টর জেনারেল (Addl. IGP)">
+                অতিরিক্ত ইন্সপেক্টর জেনারেল (Addl. IGP)
+              </option>
+              <option value="ডিপুটি ইন্সপেক্টর জেনারেল (DIG)">ডিপুটি ইন্সপেক্টর জেনারেল (DIG)</option>
+              <option value="অতিরিক্ত ডিআইজি (Addl. DIG)">অতিরিক্ত ডিআইজি (Addl. DIG)</option>
+              <option value="পুলিশ সুপার (SP)">পুলিশ সুপার (SP)</option>
+              <option value="অতিরিক্ত এসপি (Addl. SP)">অতিরিক্ত এসপি (Addl. SP)</option>
+              <option value="সহকারী পুলিশ সুপার (ASP)">সহকারী পুলিশ সুপার (ASP)</option>
+              <option value="ইন্সপেক্টর (Inspector)">ইন্সপেক্টর (Inspector)</option>
+              <option value="সাব-ইন্সপেক্টর (SI)">সাব-ইন্সপেক্টর (SI)</option>
+              <option value="সার্জেন্ট (Sergeant)">সার্জেন্ট (Sergeant)</option>
+              <option value="সহকারী সাব-ইন্সপেক্টর (ASI)">সহকারী সাব-ইন্সপেক্টর (ASI)</option>
+              <option value="নায়েক (Nayek)">নায়েক (Nayek)</option>
+              <option value="কনস্টেবল (Constable)">কনস্টেবল (Constable)</option>
+            </select>
           </div>
 
           <div>
@@ -104,13 +165,6 @@ const SignUp = () => {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </span>
             </div>
-          </div>
-
-          {/* Forgot password */}
-          <div className="text-right">
-            <Link to="/forgot-password" className="text-sm underline">
-              পাসওয়ার্ড ভুলে গেছেন?
-            </Link>
           </div>
 
           {/* Sign up button */}
