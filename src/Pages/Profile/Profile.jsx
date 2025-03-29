@@ -20,6 +20,7 @@ import auth from "../../firebase/firebase.config";
 import axios from "axios";
 import { AuthContext } from "../../AuthProvider/AuthProvider";
 import { useQuery } from "@tanstack/react-query";
+import Experience from "../../Components/Experience/Experience";
 
 const Profile = () => {
   const { user } = useContext(AuthContext);
@@ -46,7 +47,6 @@ const Profile = () => {
     enabled: !!user?.email,
     queryFn: async () => {
       const res = await axios.get(`http://localhost:5000/users/${user.email}`);
-      refetch();
       return res.data;
     },
   });
@@ -67,34 +67,42 @@ const Profile = () => {
     return data.data.url;
   };
 
- // Combined update function that handles both cases
-const updateUserData = async (updateData) => {
-  try {
-    await axios.put(`http://localhost:5000/users/${user?.email}`, updateData);
-  } catch (error) {
-    console.error('Update failed:', error);
-  }
-};
+  // Combined update function that handles both cases
+  const updateUserData = async (updateData) => {
+    try {
+      const res = await axios.put(
+        `http://localhost:5000/users/${user?.email}`,
+        updateData
+      );
+      if (res.data.success) {
+        refetch();
+      }
+      console.log(res.data);
+    } catch (error) {
+      console.error("Update failed:", error);
+    }
+  };
 
-// Image update handler
-const handleFileChange = async (e) => {
-  const file = e.target.files[0];
-  const imageUrl = await handleImageUpload(file);
+  // Image update handler
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    const imageUrl = await handleImageUpload(file);
 
-  // Update Firebase
-  await updateProfile(auth.currentUser, {
-    photoURL: imageUrl,
-  });
+    // Update Firebase
+    await updateProfile(auth.currentUser, {
+      photoURL: imageUrl,
+    });
 
-  // Update MongoDB with only image (won't affect aboutInfo)
-  await updateUserData({ image: imageUrl });
-};
+    // Update MongoDB with only image (won't affect aboutInfo)
+    await updateUserData({ image: imageUrl });
+  };
 
-// About section handler
-const handleAboutInfo = async () => {
-  // Update MongoDB with only aboutData (won't affect profilePic)
-  await updateUserData({ aboutData: aboutInfo });
-};
+  // About section handler
+  const handleAboutInfo = async () => {
+    // Update MongoDB with only aboutData (won't affect profilePic)
+    const res = await updateUserData({ aboutData: aboutInfo });
+    console.log(res);
+  };
   const [rewards, setRewards] = useState([
     {
       id: 1,
@@ -148,6 +156,10 @@ const handleAboutInfo = async () => {
         training.id === id ? { ...training, [field]: value } : training
       )
     );
+  };
+
+  const handleSave = async () => {
+    await handleAboutInfo(), toggleEdit("about");
   };
 
   return (
@@ -249,7 +261,7 @@ const handleAboutInfo = async () => {
                 <h2 className="text-xl font-semibold">সম্পর্কে</h2>
                 <button
                   onClick={() => toggleEdit("about")}
-                  className="text-gray-500 hover:text-blue-600 transition opacity-0 group-hover:opacity-100"
+                  className="text-gray-500"
                 >
                   <FaEdit size={16} />
                 </button>
@@ -258,73 +270,35 @@ const handleAboutInfo = async () => {
                 <>
                   <textarea
                     className="w-full p-2 border border-gray-300 rounded"
-                    value={aboutInfo}
+                    defaultValue={details.aboutInfo}
                     onChange={(e) => setAboutInfo(e.target.value)}
                   />
                   <div className="flex justify-end">
-                    <button onClick={handleAboutInfo} className="bg-[#1B2E7A] text-white rounded p-1 px-2">
+                    <button
+                      onClick={handleSave}
+                      className="bg-[#1B2E7A] text-white rounded p-1 px-2"
+                    >
                       Save
                     </button>
                   </div>
                 </>
               ) : (
-                <p className="text-gray-700">{details.aboutInfo}</p>
+                <p className="text-gray-700">
+                  {details.aboutInfo || "No information provided"}
+                </p>
               )}
             </section>
 
             <div className="mt-6 border-t border-gray-200 py-4 w-full"></div>
             {/* Experience */}
-            <section className="mb-6 relative group">
-              <div className="flex justify-between items-center mb-3">
-                <h2 className="text-xl font-semibold">অভিজ্ঞতা</h2>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => addNewItem("experience")}
-                    className="text-gray-500 hover:text-blue-600 transition opacity-0 group-hover:opacity-100"
-                  >
-                    <FaPlus size={16} />
-                  </button>
-                  <button
-                    onClick={() => toggleEdit("experience")}
-                    className="text-gray-500 hover:text-blue-600 transition opacity-0 group-hover:opacity-100"
-                  >
-                    <FaEdit size={16} />
-                  </button>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div className="border-l-2 border-blue-500 pl-4">
-                  <div className="flex justify-between">
-                    <h3 className="font-medium">ফ্রন্টএন্ড ডেভেলপার</h3>
-                    {sections.experience && (
-                      <button className="text-red-500 text-sm">Delete</button>
-                    )}
-                  </div>
-                  <div className="flex items-center text-sm text-gray-600 mt-1">
-                    <HiOutlineBuildingOffice2 size={14} className="mr-1" />
-                    <span>টেক সলিউশন লিমিটেড</span>
-                  </div>
-                  <div className="flex justify-between text-sm text-gray-500 mt-1">
-                    <span>২০২২ - বর্তমান</span>
-                    {sections.experience && (
-                      <button className="text-blue-500 text-sm">Edit</button>
-                    )}
-                  </div>
-                  {sections.experience ? (
-                    <textarea
-                      className="w-full p-2 border border-gray-300 rounded mt-2 text-sm"
-                      defaultValue="রিঅ্যাক্ট জাভাস্ক্রিপ্ট ব্যবহার করে ওয়েব অ্যাপ্লিকেশন ডেভেলপমেন্ট, UI/UX ইম্প্রুভমেন্ট, এবং পারফরমেন্স অপ্টিমাইজেশনের কাজ করেছি।"
-                    />
-                  ) : (
-                    <p className="text-gray-700 mt-2 text-sm">
-                      রিঅ্যাক্ট জাভাস্ক্রিপ্ট ব্যবহার করে ওয়েব অ্যাপ্লিকেশন
-                      ডেভেলপমেন্ট, UI/UX ইম্প্রুভমেন্ট, এবং পারফরমেন্স
-                      অপ্টিমাইজেশনের কাজ করেছি।
-                    </p>
-                  )}
-                </div>
-              </div>
-            </section>
+             <Experience 
+             toggleEdit={toggleEdit} 
+             addNewItem={addNewItem}
+             updateUserData={updateUserData}
+             sections={sections}
+             details={details}
+             handleSave={handleSave}
+             />
             <div className="mt-6 border-t border-gray-200 py-4 w-full"></div>
             {/* Education */}
             <section className="mb-6 relative group">

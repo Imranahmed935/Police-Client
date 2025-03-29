@@ -6,6 +6,7 @@ import LogIn from "../Pages/LogIn/LogIn";
 import SignUp from "../Pages/SignUp/SignUp";
 import Profile from "../Pages/Profile/Profile";
 import Dashboard from "../Pages/Dashboard/Dashboard/Dashboard";
+import ExperienceUpdate from "../Pages/ExperienceUpdate/ExperienceUpdate";
 
 export const router = createBrowserRouter([
     {
@@ -32,6 +33,11 @@ export const router = createBrowserRouter([
             {
                 path:'/dashboard',
                 element:<Dashboard/>
+            },
+            {
+                path:'/update',
+                element:<ExperienceUpdate/>,
+               
             }
         ]
 
