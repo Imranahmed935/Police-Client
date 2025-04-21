@@ -45,7 +45,7 @@ const ExperienceUpdate = () => {
           `http://localhost:5000/users/${id}?index=${index}`
         );
         if (res.data.success) {
-          refetch()
+          refetch();
           Swal.fire({
             title: "Deleted!",
             text: "Your file has been deleted.",

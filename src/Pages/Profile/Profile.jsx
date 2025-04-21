@@ -6,13 +6,11 @@ import {
   FaGithub,
   FaTwitter,
   FaGlobe,
-  FaPlus,
+ 
   FaEdit,
-  FaAward,
-  FaCertificate,
 } from "react-icons/fa";
 import {
-  HiOutlineBuildingOffice2,
+
   HiOutlineMapPin,
   HiOutlineEnvelope,
 } from "react-icons/hi2";
@@ -58,7 +56,6 @@ const Profile = () => {
     },
   });
 
-  console.log(details);
   //imageUpload function
   const handleImageUpload = async (imageFile) => {
     const formData = new FormData();
@@ -108,7 +105,7 @@ const Profile = () => {
   const handleAboutInfo = async () => {
     // Update MongoDB with only aboutData (won't affect profilePic)
     const res = await updateUserData({ aboutData: aboutInfo });
-    console.log(res);
+
   };
   const [rewards, setRewards] = useState([
     {
@@ -308,7 +305,13 @@ const Profile = () => {
             />
             <div className="mt-6 border-t border-gray-200 py-4 w-full"></div>
             {/* Education */}
-            <Education sections={sections} />
+            <Education
+              toggleEdit={toggleEdit}
+              addNewItem={addNewItem}
+              updateUserData={updateUserData}
+              sections={sections}
+              details={details}
+            />
             <div className="mt-6 border-t border-gray-200 py-4 w-full"></div>
             {/* Rewards (New Section) */}
             <Reward rewards={rewards} sections={sections} />
